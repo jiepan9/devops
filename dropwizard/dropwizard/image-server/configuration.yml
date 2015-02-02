@@ -2,16 +2,19 @@ server:
   applicationConnectors:
     - type: http
       port: 9090
+  adminConnectors:
+    - type: http
+      port: 9091
 metrics:
   reporters:
-    - type: console
-      timeZone: UTC
-      output: stdout
-      durationUnit: milliseconds
-      rateUnit: seconds
-      frequency: 120 seconds
+#    - type: console
+#      timeZone: UTC
+#      output: stdout
+#      durationUnit: milliseconds
+#      rateUnit: seconds
+#      frequency: 120 seconds
 #does not work
-#    - type: graphite
-#      host: localhost
-#      port: 8888
-#      prefix: /graphite
+    - type: graphite
+      host: localhost
+      port: 8888
+      prefix: /graphite
