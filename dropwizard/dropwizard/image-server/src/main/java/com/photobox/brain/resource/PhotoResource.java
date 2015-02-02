@@ -1,5 +1,6 @@
 package com.photobox.brain.resource;
 
+import com.codahale.metrics.annotation.Timed;
 import javax.imageio.ImageIO;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -19,6 +20,7 @@ public class PhotoResource {
     @GET
     @Path("/{folder}/{id}.jpg")
     @Produces("image/jpeg")
+    @Timed
     public Response getPhoto(@PathParam("folder") String folder,
                              @PathParam("id") long id) throws IOException {
         ByteArrayOutputStream baos=new ByteArrayOutputStream(1000);
