@@ -20,8 +20,8 @@ public class ImageServerApplication extends Application<Configuration> {
     @Override
     public void run(Configuration conf, io.dropwizard.setup.Environment env) throws Exception {
         env.jersey().register(new PhotoResource());
-        env.servlets().addServlet("metrics-servlet",
-            new MetricsServlet(env.metrics())).addMapping("/metrics");
+        //env.servlets().addServlet("metrics-servlet",
+           // new MetricsServlet(env.metrics())).addMapping("/metrics");
     }
 
 
