@@ -57,6 +57,10 @@
       <id>sonatype-nexus-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
+    <repository>
+      <id>mvnrepository</id>
+      <url>http://mvnrepository.com/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -92,7 +96,11 @@
       <version>${vertx.testtools.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+		<groupId>io.vertx</groupId>
+        <artifactId>vertx-metrics</artifactId>
+        <version>3.0.0-milestone2</version>
+	</dependency>
     <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
     <dependency>
@@ -138,6 +146,21 @@
             <artifactId>vertx-hazelcast</artifactId>
             <version>${vertx.version}</version>
           </dependency>
+          <!--
+          <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-metrics</artifactId>
+            <version>3.0.0-milestone2</version>
+          </dependency>
+          -->
+          <!--
+                    <dependency>
+                      <groupId>com.bloidonia</groupId>
+                      <artifactId>mod-metrics</artifactId>
+                      <version>1.0.0</version>
+                    </dependency>
+                    -->
+
         </dependencies>
         <executions>
           <execution>
