@@ -17,8 +17,9 @@ import java.util.Map;
 public class ImageServer extends Verticle {
 
     public void start(){
-        
-        //vertx = Vertx.vertx(new VertxOptions().setMetricsEnabled(true));
+
+        //Vertx.vertx(new VertxOptions().setMetricsEnabled(true));
+
         startTestImageServing();
 
     }
