@@ -1,6 +1,6 @@
 package com.photobox.unit;
 
-import com.photobox.brain.imageserver.http.Vertx;
+import com.photobox.brain.imageserver.http.ImageServer;
 import org.junit.Test;
 
 /*
@@ -24,7 +24,7 @@ public class ExampleUnitTest {
 
   @Test
   public void testImageServer() {
-    Vertx imageserver = new Vertx();
+    ImageServer imageserver = new ImageServer();
 
     // do something with imagerserver
   }
