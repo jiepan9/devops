@@ -1,7 +1,7 @@
 {
 
   // Java verticle
-  "main":"com.photobox.brain.imageserver.http.Vertx",
+  "main":"com.photobox.brain.imageserver.http.ImageServer",
   //"main":"com.photobox.PingVerticle",
 
   // In this example we also provide various other versions of the main verticle, you can uncomment this and
