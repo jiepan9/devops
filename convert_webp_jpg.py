@@ -8,7 +8,8 @@ dwebp
 3 convert png file to jpg using ImageMagick
 convert
 
-
+Usage:
+python convert_webp_jpg.py PATH_TO_PHOTO_DIR
 '''
 
 
