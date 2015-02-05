@@ -19,8 +19,8 @@ public class ImageServer extends Verticle {
 
     public void start(){
         startTestImageServing(); //8081
-        startReadDataFromRequest(); //8082
-        startProcessingRequest(); //8080
+      //  startReadDataFromRequest(); //8082
+      //  startProcessingRequest(); //8080
     }
 
 
@@ -82,7 +82,7 @@ public class ImageServer extends Verticle {
             long start = System.currentTimeMillis();
              Logger log = container.logger();
              String path = request.path();
-             request.response().sendFile("d:/space/" + path);
+             request.response().sendFile("/space/" + path);
              StringBuffer sb = new StringBuffer();
              for (Map.Entry<String, String> header: request.headers().entries()){
                 sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
@@ -98,7 +98,7 @@ public class ImageServer extends Verticle {
              long end = System.currentTimeMillis();
              timer.update(end - start, TimeUnit.MILLISECONDS);
 
-             log.info("Request received: " + sb.toString());
+             //log.info("Request received: " + sb.toString());
              log.info("Count: " + meter.getCount());
              log.info("Timer five minute Rate: " + timer.getFiveMinuteRate());
 
