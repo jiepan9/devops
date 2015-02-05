@@ -22,7 +22,7 @@ public class PhotoResource {
     @Produces("image/jpeg")
     @Timed
     public Response getPhoto(@PathParam("folder") String folder,
-                             @PathParam("id") long id) throws IOException {
+                             @PathParam("id") String id) throws IOException {
         ByteArrayOutputStream baos=new ByteArrayOutputStream(1000);
         BufferedImage image = ImageIO.read(new File("/space/" + folder + "/" + id + ".jpg"));
         ImageIO.write(image, "jpg", baos);
