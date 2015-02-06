@@ -82,7 +82,7 @@ public class ImageServer extends Verticle {
             long start = System.currentTimeMillis();
              Logger log = container.logger();
              String path = request.path();
-             request.response().sendFile("/space/" + path);
+             request.response().sendFile("d:/space/" + path);
              StringBuffer sb = new StringBuffer();
              for (Map.Entry<String, String> header: request.headers().entries()){
                 sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
