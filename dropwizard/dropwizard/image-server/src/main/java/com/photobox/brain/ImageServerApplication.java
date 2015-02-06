@@ -2,11 +2,9 @@ package com.photobox.brain;
 
 
 
-import com.codahale.metrics.servlets.MetricsServlet;
+
 import com.photobox.brain.resource.PhotoResource;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
 
 /**
  * Created by jpan on 15-1-27.
