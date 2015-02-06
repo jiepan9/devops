@@ -5,9 +5,9 @@
 from __future__ import print_function
 import sys
 
-url = 'http://localhost:9090/2015-02-Test-WebP/text_black.jpg'
+url = 'http://10.17.101.51:9090/2015-02-Test-WebP/text_black.jpg'
 urls =[]
-for i in range(10):
+for i in range(500):
     urls.append(url)
 
 import gevent
