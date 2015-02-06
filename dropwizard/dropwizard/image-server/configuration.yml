@@ -5,8 +5,8 @@ server:
   adminConnectors:
     - type: http
       port: 9091
-metrics:
-  reporters:
+#metrics:
+#  reporters:
 #    - type: console
 #      timeZone: UTC
 #      output: stdout
@@ -14,7 +14,7 @@ metrics:
 #      rateUnit: seconds
 #      frequency: 120 seconds
 #does not work
-    - type: graphite
-      host: localhost
-      port: 8888
-      prefix: /graphite
+#    - type: graphite
+#      host: localhost
+#      port: 8888
+#      prefix: /graphite
