@@ -4,16 +4,14 @@ import com.codahale.metrics.jvm.BufferPoolMetricSet;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
-import org.vertx.java.core.VoidHandler;
+import org.apache.log4j.BasicConfigurator;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServer;
-
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
-
+import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.RuntimeMXBean;
@@ -23,118 +21,61 @@ import java.lang.management.RuntimeMXBean;
  */
 public class ImageServer extends Verticle {
 
+
     final MetricRegistry metrics = new MetricRegistry();
     final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
 
     public void start(){
-        startTestImageServing(); //8081
-      //  startReadDataFromRequest(); //8082
-      //  startProcessingRequest(); //8080
+        BasicConfigurator.configure();
+        startTestImageServing();
     }
-
-
-    private void startProcessingRequest(){
-
-        HttpServer server = vertx.createHttpServer();
-
-        server.requestHandler(request -> {
-            StringBuffer sb = new StringBuffer();
-            for (Map.Entry<String, String> header: request.headers().entries()){
-                sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-            }
-            for (Map.Entry<String, String> param: request.params().entries()){
-                sb.append(param.getKey()).append(": ").append(param.getValue()).append("\n");
-            }
-            sb.append("remote address; ").append( request.remoteAddress()).append("\n");
-            sb.append("path: ").append(request.path()).append("\n");
-            sb.append("query: ").append(request.query()).append("\n");
-            sb.append("absoluteURI: ").append(request.absoluteURI()).append("\n");
-            request.response().putHeader("content-type", "text/plain");
-            request.response().end(sb.toString());
-
-          //  Logger log=container.logger();
-          //  log.info("A request has arrived on the server!");
-
-        });
-        server.listen(8080, "localhost");
-    }
-
-
-    /**
-     * No response !!
-     */
-    private void startReadDataFromRequest(){
-        HttpServer server = vertx.createHttpServer();
-
-        server.requestHandler(request -> {
-
-            final Buffer body = new Buffer(0);
-
-            request.dataHandler(buffer -> body.appendBuffer(buffer));
-            request.endHandler(new VoidHandler() {
-                public void handle() {
-                    Logger log=container.logger();
-                    // The entire body has now been received
-                    log.info("The total body received was " + body.length() + " bytes");
-                }
-            });
-
-        }).listen(8082, "localhost");
-    }
-
 
     private void startTestImageServing(){
-
+        // metrics jvm
         metrics.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory
                 .getPlatformMBeanServer()));
         metrics.register("jvm.gc", new GarbageCollectorMetricSet());
         metrics.register("jvm.memory", new MemoryUsageGaugeSet());
         metrics.register("jvm.threads", new ThreadStatesGaugeSet());
+        CsvReporter csvReporter = CsvReporter.forRegistry(metrics).build(new File("/home/jpan/devops/vertx/image-server/data"));
+        csvReporter.start(1, TimeUnit.SECONDS);
+        JmxReporter jmxReporter = JmxReporter.forRegistry(metrics).build();
+        jmxReporter.start();
 
-        JmxReporter.forRegistry(metrics).build().start();
-
+        // counter
         final Meter meter = getMeter();
-        final Timer timer = getTimer();
-
-
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(request -> {
-            long start = System.currentTimeMillis();
              Logger log = container.logger();
              String path = request.path();
-             request.response().sendFile("/space/" + path);
-             StringBuffer sb = new StringBuffer();
-             for (Map.Entry<String, String> header: request.headers().entries()){
-                sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-            }
-             for (Map.Entry<String, String> param: request.params().entries()){
-                sb.append(param.getKey()).append(": ").append(param.getValue()).append("\n");
-            }
-             sb.append("remote address; ").append( request.remoteAddress()).append("\n");
-             sb.append("path: ").append(request.path()).append("\n");
-             sb.append("query: ").append(request.query()).append("\n");
-             sb.append("absoluteURI: ").append(request.absoluteURI()).append("\n");
              meter.mark();
-             long end = System.currentTimeMillis();
-             timer.update(end - start, TimeUnit.MILLISECONDS);
+             if (path.contains("metrics")) {
+                 //metrics
+                 StringBuffer sb = new StringBuffer();
+                 sb.append("Gauges\n");
+                 metrics.getGauges().forEach((k, v) -> {
+                     sb.append(k + ":" + v.getValue()).append('\n');
+                 });
+                 sb.append("Meters:\n" );
+                 sb.append("count:").append(meter.getCount()).append('\n');
+                 sb.append("m15_rate:").append(meter.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(meter.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(meter.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(meter.getMeanRate()).append('\n');
+                 sb.append("units:").append(meter.)
+
+                 request.response().end(sb.toString());
+
+             } else {
+                 request.response().sendFile("/space/" + path);
+             }
 
 
 
 
-             //log.info("Request received: " + sb.toString());
-             log.info("Count: " + meter.getCount());
-             log.info("Timer five minute Rate: " + timer.getFiveMinuteRate());
 
-             log.info("Gauges: \n"  );
-
-             // gauges
-
-
-
-
-
-
+            log.info("Count: " + counter.getCount());
 
          });
 
@@ -149,13 +90,4 @@ public class ImageServer extends Verticle {
 
     }
 
-    public Timer getTimer(){
-        final  Timer requests = metrics.timer("requestTimer");
-        return requests;
-    }
-
-    public SortedMap<String, Gauge> getJvmMemory(){
-        SortedMap<String, Gauge> requests = metrics.getGauges();
-        return requests;
-    }
 }
