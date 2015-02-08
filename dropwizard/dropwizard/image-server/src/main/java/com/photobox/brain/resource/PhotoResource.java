@@ -25,7 +25,7 @@ public class PhotoResource {
                              @PathParam("id") String id) throws IOException {
         StreamingOutput streamOutput = os -> {
 
-            InputStream stream =  new FileInputStream("d:/space/" + folder + "/" + id + ".jpg");
+            InputStream stream =  new FileInputStream("/space/" + folder + "/" + id + ".jpg");
             ByteStreams.copy(stream, os);
         };
 
