@@ -129,14 +129,7 @@ public class ImageServer extends Verticle {
              log.info("Gauges: \n"  );
 
              // gauges
-             Map<String, Metric> jvmMetrics = gauges.getMetrics();
 
-             jvmMetrics.forEach((k,v) ->
-
-                             log.info("Key " + k + " : " + v)
-
-
-             );
 
 
 
