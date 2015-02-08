@@ -8,14 +8,20 @@ import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+import java.lang.management.RuntimeMXBean;
 
 /**
  * Created by jpan on 1/22/15.
  */
 public class ImageServer extends Verticle {
+
     final MetricRegistry metrics = new MetricRegistry();
+    final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
 
     public void start(){
         startTestImageServing(); //8081
@@ -75,14 +81,25 @@ public class ImageServer extends Verticle {
 
 
     private void startTestImageServing(){
+
+        metrics.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory
+                .getPlatformMBeanServer()));
+        metrics.register("jvm.gc", new GarbageCollectorMetricSet());
+        metrics.register("jvm.memory", new MemoryUsageGaugeSet());
+        metrics.register("jvm.threads", new ThreadStatesGaugeSet());
+
+        JmxReporter.forRegistry(metrics).build().start();
+
         final Meter meter = getMeter();
         final Timer timer = getTimer();
+
+
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(request -> {
             long start = System.currentTimeMillis();
              Logger log = container.logger();
              String path = request.path();
-             request.response().sendFile("d:/space/" + path);
+             request.response().sendFile("/space/" + path);
              StringBuffer sb = new StringBuffer();
              for (Map.Entry<String, String> header: request.headers().entries()){
                 sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
@@ -98,9 +115,26 @@ public class ImageServer extends Verticle {
              long end = System.currentTimeMillis();
              timer.update(end - start, TimeUnit.MILLISECONDS);
 
+
+
+
              //log.info("Request received: " + sb.toString());
              log.info("Count: " + meter.getCount());
              log.info("Timer five minute Rate: " + timer.getFiveMinuteRate());
+
+             log.info("Gauges: \n"  );
+
+             // gauges
+             Map<String, Metric> jvmMetrics = gauges.getMetrics();
+
+             jvmMetrics.forEach((k,v) ->
+
+                             log.info("Key " + k + " : " + v)
+
+
+             );
+
+
 
 
 
@@ -123,4 +157,8 @@ public class ImageServer extends Verticle {
         return requests;
     }
 
+    public SortedMap<String, Gauge> getJvmMemory(){
+        SortedMap<String, Gauge> requests = metrics.getGauges();
+        return requests;
+    }
 }
