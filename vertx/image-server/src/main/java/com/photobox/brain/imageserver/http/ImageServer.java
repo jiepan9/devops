@@ -39,21 +39,23 @@ public class ImageServer extends Verticle {
         metrics.register("jvm.gc", new GarbageCollectorMetricSet());
         metrics.register("jvm.memory", new MemoryUsageGaugeSet());
         metrics.register("jvm.threads", new ThreadStatesGaugeSet());
-        CsvReporter csvReporter = CsvReporter.forRegistry(metrics).build(new File("/home/jpan/devops/vertx/image-server/data"));
+        /*CsvReporter csvReporter = CsvReporter.forRegistry(metrics).build(new File("/home/jpan/devops/vertx/image-server/data"));
         csvReporter.start(1, TimeUnit.SECONDS);
         JmxReporter jmxReporter = JmxReporter.forRegistry(metrics).build();
         jmxReporter.start();
+        */
 
         // counter
         final Meter meter = getMeter();
-        final Timer timer = getTimer();
+        final Timer photoTimer = getPhotoTimer();
+        final Timer metricsTimer = getMetricsTimer();
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(request -> {
              Logger log = container.logger();
              String path = request.path();
              meter.mark();
 
-
+            log.info("Requested path:" + path);
              if (path.contains("metrics")) {
                  //metrics
                  StringBuffer sb = new StringBuffer();
@@ -68,31 +70,51 @@ public class ImageServer extends Verticle {
                  sb.append("m5_rate:").append(meter.getFiveMinuteRate()).append('\n');
                  sb.append("mean_rate:").append(meter.getMeanRate()).append('\n');
 
-                 sb.append("Timers:\n");
-                 sb.append("count:").append(timer.getCount()).append('\n');
-                 sb.append("m15rate:").append(timer.getFifteenMinuteRate()).append('\n');
-                 sb.append("m1_rate:").append(timer.getOneMinuteRate()).append('\n');
-                 sb.append("m5_rate:").append(timer.getFiveMinuteRate()).append('\n');
-                 sb.append("mean_rate:").append(timer.getMeanRate()).append('\n');
+                 sb.append("PhotoTimers:\n");
+                 sb.append("count:").append(photoTimer.getCount()).append('\n');
+                 sb.append("m15rate:").append(photoTimer.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(photoTimer.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(photoTimer.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(photoTimer.getMeanRate()).append('\n');
 
                  sb.append("snapshot:\n");
-                 sb.append("75th percentile:").append(timer.getSnapshot().get75thPercentile()).append('\n');
-                 sb.append("95th percentile:").append(timer.getSnapshot().get95thPercentile()).append('\n');
-                 sb.append("98th percentile:").append(timer.getSnapshot().get98thPercentile()).append('\n');
-                 sb.append("999th percentile:").append(timer.getSnapshot().get999thPercentile()).append('\n');
-                 sb.append("99th percentile:").append(timer.getSnapshot().get99thPercentile()).append('\n');
-                 sb.append("max:").append(timer.getSnapshot().getMax()).append('\n');
-                 sb.append("mean:").append(timer.getSnapshot().getMean()).append('\n');
-                 sb.append("median:").append(timer.getSnapshot().getMedian()).append('\n');
-                 sb.append("min:").append(timer.getSnapshot().getMin()).append('\n');
-                 sb.append("stdDev:").append(timer.getSnapshot().getStdDev()).append('\n');
+                 sb.append("75th percentile:").append(photoTimer.getSnapshot().get75thPercentile()).append('\n');
+                 sb.append("95th percentile:").append(photoTimer.getSnapshot().get95thPercentile()).append('\n');
+                 sb.append("98th percentile:").append(photoTimer.getSnapshot().get98thPercentile()).append('\n');
+                 sb.append("999th percentile:").append(photoTimer.getSnapshot().get999thPercentile()).append('\n');
+                 sb.append("99th percentile:").append(photoTimer.getSnapshot().get99thPercentile()).append('\n');
+                 sb.append("max:").append(photoTimer.getSnapshot().getMax()).append('\n');
+                 sb.append("mean:").append(photoTimer.getSnapshot().getMean()).append('\n');
+                 sb.append("median:").append(photoTimer.getSnapshot().getMedian()).append('\n');
+                 sb.append("min:").append(photoTimer.getSnapshot().getMin()).append('\n');
+                 sb.append("stdDev:").append(photoTimer.getSnapshot().getStdDev()).append('\n');
+
+                 sb.append("MetricsTimers:\n");
+                 sb.append("count:").append(metricsTimer.getCount()).append('\n');
+                 sb.append("m15rate:").append(metricsTimer.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(metricsTimer.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(metricsTimer.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(metricsTimer.getMeanRate()).append('\n');
+
+                 sb.append("snapshot:\n");
+                 sb.append("75th percentile:").append(metricsTimer.getSnapshot().get75thPercentile()).append('\n');
+                 sb.append("95th percentile:").append(metricsTimer.getSnapshot().get95thPercentile()).append('\n');
+                 sb.append("98th percentile:").append(metricsTimer.getSnapshot().get98thPercentile()).append('\n');
+                 sb.append("999th percentile:").append(metricsTimer.getSnapshot().get999thPercentile()).append('\n');
+                 sb.append("99th percentile:").append(metricsTimer.getSnapshot().get99thPercentile()).append('\n');
+                 sb.append("max:").append(metricsTimer.getSnapshot().getMax()).append('\n');
+                 sb.append("mean:").append(metricsTimer.getSnapshot().getMean()).append('\n');
+                 sb.append("median:").append(metricsTimer.getSnapshot().getMedian()).append('\n');
+                 sb.append("min:").append(metricsTimer.getSnapshot().getMin()).append('\n');
+                 sb.append("stdDev:").append(metricsTimer.getSnapshot().getStdDev()).append('\n');
+
 
                  request.response().end(sb.toString());
-                 timer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+                 metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
              } else {
                  request.response().sendFile("/space/" + path);
-                 timer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+                 photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
 
 
@@ -114,8 +136,13 @@ public class ImageServer extends Verticle {
 
     }
 
-    public Timer getTimer() {
-        final Timer timer = metrics.timer("requestTimer");
+    public Timer getPhotoTimer() {
+        final Timer timer = metrics.timer("requestPhotoTimer");
+        return timer;
+    }
+
+    public Timer getMetricsTimer(){
+        final Timer timer = metrics.timer("requestMetricsTimer");
         return timer;
     }
 
