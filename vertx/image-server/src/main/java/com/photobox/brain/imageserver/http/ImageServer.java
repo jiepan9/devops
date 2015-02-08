@@ -27,8 +27,10 @@ public class ImageServer extends Verticle {
     long start;
 
     public void start(){
-        start = System.currentTimeMillis();
         BasicConfigurator.configure();
+
+        start = System.currentTimeMillis();
+
         startTestImageServing();
     }
 
