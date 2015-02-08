@@ -111,6 +111,11 @@
         <version>${metrics.version}</version>
     </dependency>
 
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-jvm</artifactId>
+        <version>${metrics.version}</version>
+    </dependency>
 
     <!-- Add any other dependencies that you want packaged into your module (in the lib dir) here
     as 'compile' dependencies. Here is an example
