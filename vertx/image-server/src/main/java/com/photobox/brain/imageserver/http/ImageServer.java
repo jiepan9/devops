@@ -5,7 +5,10 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import org.apache.log4j.BasicConfigurator;
+import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServer;
+import org.vertx.java.core.http.ServerWebSocket;
+import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
@@ -26,6 +29,7 @@ public class ImageServer extends Verticle {
     final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
     long start;
 
+
     public void start(){
         BasicConfigurator.configure();
 
@@ -35,6 +39,8 @@ public class ImageServer extends Verticle {
     }
 
     private void startTestImageServing(){
+        Logger log = container.logger();
+
         // metrics jvm
         metrics.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory
                 .getPlatformMBeanServer()));
@@ -48,12 +54,13 @@ public class ImageServer extends Verticle {
         */
 
         // counter
-        final Meter meter = getMeter();
-        final Timer photoTimer = getPhotoTimer();
-        final Timer metricsTimer = getMetricsTimer();
+        Meter meter = getMeter();
+        Timer photoTimer = getPhotoTimer();
+        Timer metricsTimer = getMetricsTimer();
+
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(request -> {
-             Logger log = container.logger();
+
              String path = request.path();
              meter.mark();
 
@@ -114,39 +121,35 @@ public class ImageServer extends Verticle {
                  request.response().end(sb.toString());
                  metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
-             } else {
-                 request.response().sendFile("/space/" + path);
+             } else  {
+                 request.response().sendFile("d:/space/" + path);
                  photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
-
-
-
-
-
-
-
          });
-
-        server.listen(8081, "localhost");
+//        server.setAcceptBacklog(10000);
+       // server.setSendBufferSize(4 * 1024);
+       // server.setReceiveBufferSize(4 * 1024);
+        server.listen(8081);
     }
 
 
     public Meter getMeter() {
 
-        final Meter meter = metrics.meter("requestMeter");
+        Meter meter = metrics.meter("requestMeter");
         return meter;
 
     }
 
     public Timer getPhotoTimer() {
-        final Timer timer = metrics.timer("requestPhotoTimer");
+        Timer timer = metrics.timer("requestPhotoTimer");
         return timer;
     }
 
     public Timer getMetricsTimer(){
-        final Timer timer = metrics.timer("requestMetricsTimer");
+        Timer timer = metrics.timer("requestMetricsTimer");
         return timer;
     }
+
 
 
 }
