@@ -5,16 +5,11 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import org.apache.log4j.BasicConfigurator;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpServer;
-import org.vertx.java.core.http.ServerWebSocket;
-import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
-import java.io.File;
 import java.lang.management.ManagementFactory;
-
 import java.util.concurrent.TimeUnit;
 import java.lang.management.RuntimeMXBean;
 
@@ -27,11 +22,15 @@ public class ImageServer extends Verticle {
 
     final MetricRegistry metrics = new MetricRegistry();
     final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
     long start;
 
 
     public void start(){
+
+        //runMod.getLogging().setLevel(LogLevel.DEBUG);
         BasicConfigurator.configure();
+
 
         start = System.currentTimeMillis();
 
