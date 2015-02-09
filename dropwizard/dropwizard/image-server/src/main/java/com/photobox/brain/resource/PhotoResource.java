@@ -3,11 +3,9 @@ package com.photobox.brain.resource;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.io.ByteStreams;
 
-import javax.imageio.ImageIO;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.awt.image.BufferedImage;
 import java.io.*;
 
 /**
@@ -25,7 +23,7 @@ public class PhotoResource {
                              @PathParam("id") String id) throws IOException {
         StreamingOutput streamOutput = os -> {
 
-            InputStream stream =  new FileInputStream("/space/" + folder + "/" + id + ".jpg");
+            InputStream stream =  new FileInputStream("d:/space/" + folder + "/" + id + ".jpg");
             ByteStreams.copy(stream, os);
         };
 
