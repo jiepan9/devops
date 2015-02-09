@@ -1,106 +1,126 @@
 package com.photobox.brain.imageserver.http;
 
-import org.vertx.java.core.VoidHandler;
-import org.vertx.java.core.buffer.Buffer;
+import com.codahale.metrics.jvm.BufferPoolMetricSet;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
+import org.apache.log4j.BasicConfigurator;
 import org.vertx.java.core.http.HttpServer;
-
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
+import java.io.File;
+import java.lang.management.ManagementFactory;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.lang.management.RuntimeMXBean;
+
 
 /**
  * Created by jpan on 1/22/15.
  */
 public class ImageServer extends Verticle {
+
+
     final MetricRegistry metrics = new MetricRegistry();
+    final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+    long start;
 
     public void start(){
-        startTestImageServing(); //8081
-      //  startReadDataFromRequest(); //8082
-      //  startProcessingRequest(); //8080
+        BasicConfigurator.configure();
+
+        start = System.currentTimeMillis();
+
+        startTestImageServing();
     }
-
-
-    private void startProcessingRequest(){
-
-        HttpServer server = vertx.createHttpServer();
-
-        server.requestHandler(request -> {
-            StringBuffer sb = new StringBuffer();
-            for (Map.Entry<String, String> header: request.headers().entries()){
-                sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-            }
-            for (Map.Entry<String, String> param: request.params().entries()){
-                sb.append(param.getKey()).append(": ").append(param.getValue()).append("\n");
-            }
-            sb.append("remote address; ").append( request.remoteAddress()).append("\n");
-            sb.append("path: ").append(request.path()).append("\n");
-            sb.append("query: ").append(request.query()).append("\n");
-            sb.append("absoluteURI: ").append(request.absoluteURI()).append("\n");
-            request.response().putHeader("content-type", "text/plain");
-            request.response().end(sb.toString());
-
-          //  Logger log=container.logger();
-          //  log.info("A request has arrived on the server!");
-
-        });
-        server.listen(8080, "localhost");
-    }
-
-
-    /**
-     * No response !!
-     */
-    private void startReadDataFromRequest(){
-        HttpServer server = vertx.createHttpServer();
-
-        server.requestHandler(request -> {
-
-            final Buffer body = new Buffer(0);
-
-            request.dataHandler(buffer -> body.appendBuffer(buffer));
-            request.endHandler(new VoidHandler() {
-                public void handle() {
-                    Logger log=container.logger();
-                    // The entire body has now been received
-                    log.info("The total body received was " + body.length() + " bytes");
-                }
-            });
-
-        }).listen(8082, "localhost");
-    }
-
 
     private void startTestImageServing(){
+        // metrics jvm
+        metrics.register("jvm.buffers", new BufferPoolMetricSet(ManagementFactory
+                .getPlatformMBeanServer()));
+        metrics.register("jvm.gc", new GarbageCollectorMetricSet());
+        metrics.register("jvm.memory", new MemoryUsageGaugeSet());
+        metrics.register("jvm.threads", new ThreadStatesGaugeSet());
+        /*CsvReporter csvReporter = CsvReporter.forRegistry(metrics).build(new File("/home/jpan/devops/vertx/image-server/data"));
+        csvReporter.start(1, TimeUnit.SECONDS);
+        JmxReporter jmxReporter = JmxReporter.forRegistry(metrics).build();
+        jmxReporter.start();
+        */
+
+        // counter
         final Meter meter = getMeter();
-        final Timer timer = getTimer();
+        final Timer photoTimer = getPhotoTimer();
+        final Timer metricsTimer = getMetricsTimer();
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(request -> {
-            long start = System.currentTimeMillis();
              Logger log = container.logger();
              String path = request.path();
-             request.response().sendFile("d:/space/" + path);
-             StringBuffer sb = new StringBuffer();
-             for (Map.Entry<String, String> header: request.headers().entries()){
-                sb.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-            }
-             for (Map.Entry<String, String> param: request.params().entries()){
-                sb.append(param.getKey()).append(": ").append(param.getValue()).append("\n");
-            }
-             sb.append("remote address; ").append( request.remoteAddress()).append("\n");
-             sb.append("path: ").append(request.path()).append("\n");
-             sb.append("query: ").append(request.query()).append("\n");
-             sb.append("absoluteURI: ").append(request.absoluteURI()).append("\n");
              meter.mark();
-             long end = System.currentTimeMillis();
-             timer.update(end - start, TimeUnit.MILLISECONDS);
 
-             //log.info("Request received: " + sb.toString());
-             log.info("Count: " + meter.getCount());
-             log.info("Timer five minute Rate: " + timer.getFiveMinuteRate());
+            log.info("Requested path:" + path);
+             if (path.contains("metrics")) {
+                 //metrics
+                 StringBuffer sb = new StringBuffer();
+                 sb.append("Gauges\n");
+                 metrics.getGauges().forEach((k, v) -> {
+                     sb.append(k + ":" + v.getValue()).append('\n');
+                 });
+                 sb.append("Meters:\n" );
+                 sb.append("count:").append(meter.getCount()).append('\n');
+                 sb.append("m15_rate:").append(meter.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(meter.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(meter.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(meter.getMeanRate()).append('\n');
+
+                 sb.append("PhotoTimers:\n");
+                 sb.append("count:").append(photoTimer.getCount()).append('\n');
+                 sb.append("m15rate:").append(photoTimer.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(photoTimer.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(photoTimer.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(photoTimer.getMeanRate()).append('\n');
+
+                 sb.append("snapshot:\n");
+                 sb.append("75th percentile:").append(photoTimer.getSnapshot().get75thPercentile()).append('\n');
+                 sb.append("95th percentile:").append(photoTimer.getSnapshot().get95thPercentile()).append('\n');
+                 sb.append("98th percentile:").append(photoTimer.getSnapshot().get98thPercentile()).append('\n');
+                 sb.append("999th percentile:").append(photoTimer.getSnapshot().get999thPercentile()).append('\n');
+                 sb.append("99th percentile:").append(photoTimer.getSnapshot().get99thPercentile()).append('\n');
+                 sb.append("max:").append(photoTimer.getSnapshot().getMax()).append('\n');
+                 sb.append("mean:").append(photoTimer.getSnapshot().getMean()).append('\n');
+                 sb.append("median:").append(photoTimer.getSnapshot().getMedian()).append('\n');
+                 sb.append("min:").append(photoTimer.getSnapshot().getMin()).append('\n');
+                 sb.append("stdDev:").append(photoTimer.getSnapshot().getStdDev()).append('\n');
+
+                 sb.append("MetricsTimers:\n");
+                 sb.append("count:").append(metricsTimer.getCount()).append('\n');
+                 sb.append("m15rate:").append(metricsTimer.getFifteenMinuteRate()).append('\n');
+                 sb.append("m1_rate:").append(metricsTimer.getOneMinuteRate()).append('\n');
+                 sb.append("m5_rate:").append(metricsTimer.getFiveMinuteRate()).append('\n');
+                 sb.append("mean_rate:").append(metricsTimer.getMeanRate()).append('\n');
+
+                 sb.append("snapshot:\n");
+                 sb.append("75th percentile:").append(metricsTimer.getSnapshot().get75thPercentile()).append('\n');
+                 sb.append("95th percentile:").append(metricsTimer.getSnapshot().get95thPercentile()).append('\n');
+                 sb.append("98th percentile:").append(metricsTimer.getSnapshot().get98thPercentile()).append('\n');
+                 sb.append("999th percentile:").append(metricsTimer.getSnapshot().get999thPercentile()).append('\n');
+                 sb.append("99th percentile:").append(metricsTimer.getSnapshot().get99thPercentile()).append('\n');
+                 sb.append("max:").append(metricsTimer.getSnapshot().getMax()).append('\n');
+                 sb.append("mean:").append(metricsTimer.getSnapshot().getMean()).append('\n');
+                 sb.append("median:").append(metricsTimer.getSnapshot().getMedian()).append('\n');
+                 sb.append("min:").append(metricsTimer.getSnapshot().getMin()).append('\n');
+                 sb.append("stdDev:").append(metricsTimer.getSnapshot().getStdDev()).append('\n');
+
+
+                 request.response().end(sb.toString());
+                 metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
+             } else {
+                 request.response().sendFile("/space/" + path);
+                 photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+             }
+
+
+
 
 
 
@@ -113,14 +133,20 @@ public class ImageServer extends Verticle {
 
     public Meter getMeter() {
 
-        final Meter requests = metrics.meter("requestMeter");
-        return requests;
+        final Meter meter = metrics.meter("requestMeter");
+        return meter;
 
     }
 
-    public Timer getTimer(){
-        final  Timer requests = metrics.timer("requestTimer");
-        return requests;
+    public Timer getPhotoTimer() {
+        final Timer timer = metrics.timer("requestPhotoTimer");
+        return timer;
     }
+
+    public Timer getMetricsTimer(){
+        final Timer timer = metrics.timer("requestMetricsTimer");
+        return timer;
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package com.photobox.brain;
 
+
 import io.dropwizard.Configuration;
 
 /**

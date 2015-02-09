@@ -5,7 +5,10 @@
 from __future__ import print_function
 import sys
 
-urls = ['http://localhost:8081/text_black.jpg']
+url = 'http://localhost:8081/2015-02-Test-WebP/text_black.jpg'
+urls =[]
+for i in range(1000):
+	urls.append(url)
 
 import gevent
 from gevent import monkey
