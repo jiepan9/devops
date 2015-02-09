@@ -5,9 +5,10 @@
 from __future__ import print_function
 import sys
 
-url = 'http://localhost:8081/2015-02-Test-WebP/text_black.jpg'
+#url = 'http://localhost:8081/2015-02-Test-WebP/text_black.jpg'
+url = 'http://localhost:8081/metrics'
 urls =[]
-for i in range(1100):
+for i in range(5000):
 	urls.append(url)
 
 import gevent
@@ -25,7 +26,7 @@ else:
 
 def print_head(url):
     print('Starting %s' % url)
-    data = urlopen(url).read()
+    data = urlopen(url, timeout=10).read()
     print('%s: %s bytes: %r' % (url, len(data), data[:50]))
 
 jobs = [gevent.spawn(print_head, url) for url in urls]
