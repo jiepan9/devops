@@ -20,7 +20,7 @@ public class ImageServerApplication extends Application<ImageServerConfiguration
     public void run(ImageServerConfiguration conf, io.dropwizard.setup.Environment env) throws Exception {
         env.jersey().register(new PhotoResource());
         //env.servlets().addServlet("metrics-servlet",
-           // new MetricsServlet(env.metrics())).addMapping("/metrics");
+        // new MetricsServlet(env.metrics())).addMapping("/metrics");
     }
 
 
