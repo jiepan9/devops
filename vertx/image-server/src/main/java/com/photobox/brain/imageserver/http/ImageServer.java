@@ -4,11 +4,12 @@ import com.codahale.metrics.jvm.BufferPoolMetricSet;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
-import org.apache.log4j.BasicConfigurator;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
+
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.RuntimeMXBean;
@@ -22,6 +23,7 @@ public class ImageServer extends Verticle {
 
     final MetricRegistry metrics = new MetricRegistry();
     final RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+
 
     long start;
 
@@ -116,18 +118,19 @@ public class ImageServer extends Verticle {
                  sb.append("min:").append(metricsTimer.getSnapshot().getMin()).append('\n');
                  sb.append("stdDev:").append(metricsTimer.getSnapshot().getStdDev()).append('\n');
 
-
+                 log.debug("sending metrics");
                  request.response().end(sb.toString());
                  metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
              } else  {
-                 request.response().sendFile("d:/space/" + path);
+                 request.response().sendFile("/space/" + path);
                  photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
          });
-//        server.setAcceptBacklog(10000);
-       // server.setSendBufferSize(4 * 1024);
-       // server.setReceiveBufferSize(4 * 1024);
+
+        server.setAcceptBacklog(10000);
+        server.setSendBufferSize(4 * 1024);
+        server.setReceiveBufferSize(4 * 1024);
         server.listen(8081);
     }
 
