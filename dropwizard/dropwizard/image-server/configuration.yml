@@ -1,4 +1,7 @@
 server:
+  type: default
+  maxThreads: 4096
+  maxQueuedRequests: 4096
   applicationConnectors:
     - type: http
       port: 9090
