@@ -1,0 +1,12 @@
+# 
+- hosts: [aws]
+  sudo: yes
+  gether_facts: noOB
+
+  tasks:
+   
+  - name: Install git
+  apt: "name=git state=present"
+
+  - name: Install maven
+  apt: "name=maven state=present"
