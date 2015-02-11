@@ -6,7 +6,7 @@
   tasks:
    
   - name: Install git
-  apt: "name=git state=present"
+    apt: "name=git state=present"
 
   - name: Install maven
-  apt: "name=maven state=present"
+    apt: "name=maven state=present"
