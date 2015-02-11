@@ -1,7 +1,7 @@
 # 
 - hosts: [aws]
   sudo: yes
-  gether_facts: noOB
+  gether_facts: no
 
   tasks:
    
