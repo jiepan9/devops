@@ -1,0 +1,11 @@
+1 install cygwin
+2 install babun
+3 on babun : 
+	a install pip 	
+	b install ansible
+		pip install ansible
+	c install power shell
+		pip install http://github.com/diyan/pywinrm/archive/master.zip#egg=pywinrm
+ 	d test ansible
+		ansible vm -i inventaire -m setup -vvvv	
+	
