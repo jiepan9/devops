@@ -4,9 +4,24 @@
   gether_facts: no
 
   tasks:
-   
+# Basic provisioning example
+#  - ec2:
+#    key_name: 
+#    instance_type: t2.small
+#    image: ami-123456
+#    wait: yes
+#    group: webserver
+#    count: 3
+#    vpc_subnet_id: subnet-29e63245
+#    assign_public_ip: yes
+  - name: Install pip
+    apt: "name=python-pip state=present"
+
   - name: Install git
     apt: "name=git state=present"
 
   - name: Install maven
     apt: "name=maven state=present"
+
+  - name: Install gevent package
+    pip: name = gevent 
