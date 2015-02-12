@@ -19,11 +19,15 @@
     apt: update_cache=yes
 
   - name: Install packages
-    apt: name= {{ item }} state=present
+    apt: name={{ item }} state=present
     with_items:
-      - pip
+      - python-pip
       - git
       - maven
+      - python-dev
+      - libxml2-dev
+      - libxslt-dev
 
   - name: Install gevent package
     pip: name=gevent state=present
+    retries: 5
