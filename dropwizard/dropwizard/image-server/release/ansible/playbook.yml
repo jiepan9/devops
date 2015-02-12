@@ -1,7 +1,7 @@
 # 
 - hosts: [aws]
   sudo: yes
-  gether_facts: no
+#  gether_facts: no
 
   tasks:
 # Basic provisioning example
@@ -14,14 +14,16 @@
 #    count: 3
 #    vpc_subnet_id: subnet-29e63245
 #    assign_public_ip: yes
-  - name: Install pip
-    apt: "name=python-pip state=present"
+#
+  - name: Apt update
+    apt: update_cache=yes
 
-  - name: Install git
-    apt: "name=git state=present"
-
-  - name: Install maven
-    apt: "name=maven state=present"
+  - name: Install packages
+    apt: name= {{ item }} state=present
+    with_items:
+      - pip
+      - git
+      - maven
 
   - name: Install gevent package
-    pip: name = gevent 
+    pip: name=gevent state=present
