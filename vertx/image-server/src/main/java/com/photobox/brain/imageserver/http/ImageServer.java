@@ -5,6 +5,7 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import org.apache.log4j.BasicConfigurator;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
@@ -124,7 +125,8 @@ public class ImageServer extends Verticle {
                  metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
              } else  {
-                 request.response().sendFile("/space/" + path);
+
+                 request.response().sendFile("/home/ubuntu/space/" + path);
                  photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
          });
