@@ -1,7 +1,8 @@
 # 
 - hosts: [aws]
-  sudo: yes
-#  gether_facts: no
+  sudo: True
+  remote_user: ubuntu
+  gather_facts: False
 
   tasks:
 # Basic provisioning example
@@ -15,19 +16,27 @@
 #    vpc_subnet_id: subnet-29e63245
 #    assign_public_ip: yes
 #
-  - name: Apt update
-    apt: update_cache=yes
+  # - name: Apt update
+  #   apt: update_cache=yes
 
-  - name: Install packages
-    apt: name={{ item }} state=present
-    with_items:
-      - python-pip
-      - git
-      - maven
-      - python-dev
-      - libxml2-dev
-      - libxslt-dev
+  # - name: Install packages
+  #   apt: name={{ item }} state=present
+  #   with_items:
+  #     - python-pip
+  #     - git
+  #     - maven
+  #     - python-dev
+  #     - libxml2-dev
+  #     - libxslt-dev
 
-  - name: Install gevent package
-    pip: name=gevent state=present
-    retries: 5
+  # - name: Install gevent package
+  #   pip: name=gevent state=present
+  #   retries: 5
+
+  # - name: Get release from Github
+  #   git: repo=https://github.com/jiepan9/devops.git
+  #        dest=/srv/checkout
+  #        version=0.1alpha
+  - copy: src=./maven.sh dest=/home/ubuntu/maven.sh mode=0777
+  - shell: "/home/ubuntu/maven.sh >> /home/ubuntu/out 2>&1"
+    sudo: yes
