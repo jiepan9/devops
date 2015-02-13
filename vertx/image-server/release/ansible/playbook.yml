@@ -16,22 +16,22 @@
 #    vpc_subnet_id: subnet-29e63245
 #    assign_public_ip: yes
 #
-  - name: Apt update
-    apt: update_cache=yes
+  # - name: Apt update
+  #   apt: update_cache=yes
 
-  - apt_repository: repo='ppa:webupd8team/java' state=present
+  # - apt_repository: repo='ppa:webupd8team/java' state=present
   
 
-  - name: Install packages
-    apt: name={{ item }} state=present
-    with_items:
-      - python-pip
-      - git
-      - maven
-      - python-dev
-      - libxml2-dev
-      - libxslt-dev
-      - oracle-java8-installer
+  # - name: Install packages
+  #   apt: name={{ item }} state=present
+  #   with_items:
+  #     - python-pip
+  #     - git
+  #     - maven
+  #     - python-dev
+  #     - libxml2-dev
+  #     - libxslt-dev
+  #     - oracle-java8-installer
 
   # - name: Install gevent package
   #   pip: name=gevent state=present
@@ -41,6 +41,7 @@
     # git: repo=https://github.com/jiepan9/devops.git
   #        dest=/srv/checkout
   #        version=0.1alpha
-  - copy: src=~/devops/dropwizard/dropwizard/image-server/target/image-server-1.0-SNAPSHOT.jar dest=/srv/image-server-1.0-SNAPSHOT.jar mode=0777
+  - copy: src=/home/jpan/devops/vertx/image-server/target/image-server-1.0-SNAPSHOT-jar-with-dependencies.jar dest=/home/ubuntu/image-server-1.0-SNAPSHOT.jar mode=0777
+  #- copy: src=/home/jpan/devops/vertx/image-server/target/mods dest=/home/ubuntu/mods mode=0777
   # - shell: "nohup java -jar /srv/image-server-1.0-SNAPSHOT.jar > /srv/out &"
     # sudo: True
