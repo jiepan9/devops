@@ -5,9 +5,14 @@ import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import org.apache.log4j.BasicConfigurator;
+import org.vertx.java.core.AsyncResult;
+import org.vertx.java.core.AsyncResultHandler;
+import org.vertx.java.core.MultiMap;
 import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.file.AsyncFile;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.logging.Logger;
+import org.vertx.java.core.streams.Pump;
 import org.vertx.java.platform.Verticle;
 import com.codahale.metrics.*;
 
@@ -68,6 +73,9 @@ public class ImageServer extends Verticle {
              meter.mark();
 
             log.info("Requested path:" + path);
+
+            MultiMap params = request.params();
+            log.info("Params: "+ params);
              if (path.contains("metrics")) {
                  //metrics
                  StringBuffer sb = new StringBuffer();
@@ -124,10 +132,20 @@ public class ImageServer extends Verticle {
                  request.response().end(sb.toString());
                  metricsTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
-             } else  {
-                 request.response().setChunked(false);
-                 request.expectMultiPart(false);
-                 request.response().sendFile("/space/" + path).end();
+             }
+             else if (params.get("pump").equals("1")){
+                 vertx.fileSystem().open("/space/" + path, ar -> {
+                     AsyncFile file = ar.result();
+                     Pump.createPump(file, request.response());
+                 });
+
+
+             }
+             else  {
+
+                 request.response().setChunked(true);
+
+                 request.response().sendFile("/space/" + path);
 
                  photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
