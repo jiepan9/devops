@@ -128,6 +128,7 @@ public class ImageServer extends Verticle {
                  request.response().setChunked(false);
                  request.expectMultiPart(false);
                  request.response().sendFile("/space/" + path);
+                 request.response().end();
                  photoTimer.update(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
              }
          });
